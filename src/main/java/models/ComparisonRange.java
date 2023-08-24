@@ -1,5 +1,8 @@
-package misc;
+package models;
 
+import org.apache.flink.api.common.time.Time;
+
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 public class ComparisonRange {
@@ -24,6 +27,26 @@ public class ComparisonRange {
 
     public RangeAggregationType getAggregationType() {
         return aggregationType;
+    }
+
+    public Long getLengthInMilliseconds() {
+
+        return timeUnit.toMillis(length);
+    }
+
+    public Long getSlideInMilliseconds() {
+
+        return timeUnit.toMillis(slide);
+    }
+
+    @Override
+    public String toString() {
+        return "ComparisonRange{" +
+                "aggregationType=" + aggregationType +
+                ", length=" + length +
+                ", slide=" + slide +
+                ", timeUnit=" + timeUnit +
+                '}';
     }
 
     public Long getLength() {

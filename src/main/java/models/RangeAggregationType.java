@@ -1,8 +1,7 @@
-package misc;
+package models;
 
 public enum RangeAggregationType {
 
-    THRESHOLD_COUNT,
     AVERAGE,
     MAX,
     MIN;

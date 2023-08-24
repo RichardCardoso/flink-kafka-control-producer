@@ -1,14 +1,13 @@
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
-import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 
 import java.util.Map;
 
-public class ControlProducer {
+public class ControlProducer<T, R extends SerializationSchema<T>> {
 
-    public static KafkaSink<String> producer(Map<String, String> params) {
+    public KafkaSink<T> producer(Map<String, String> params, String topic, R schema) {
 
         String host = "kafka";
         String port = "29092";
@@ -20,50 +19,16 @@ public class ControlProducer {
             port = params.get("port");
         }
 
-        KafkaRecordSerializationSchema<String> serializationSchema = KafkaRecordSerializationSchema.<String>builder()
-                .setValueSerializationSchema(new SimpleStringSchema())
-                .setTopic("test")
+        KafkaRecordSerializationSchema<T> serializationSchema = KafkaRecordSerializationSchema.builder()
+                .setValueSerializationSchema(schema)
+                .setTopic(topic)
                 .build();
 
-        return KafkaSink.<String>builder()
+        return KafkaSink.<T>builder()
                 .setBootstrapServers(host + ":" + port)
                 .setRecordSerializer(serializationSchema)
                 .build();
     }
 
-    public static class MyNumberSequenceSource extends RichParallelSourceFunction<String> {
 
-        private final long interval;
-
-        public MyNumberSequenceSource(long interval) {
-
-            this.interval = interval;
-        }
-
-        @Override
-        public void run(SourceContext<String> ctx) throws Exception {
-
-            int counter = 1;
-            boolean trigger = false;
-            while(true) {
-                if (!trigger || counter % 5 == 0) {
-                    trigger = !trigger;
-                    counter = 1;
-                } else {
-                    counter++;
-                }
-                if (trigger) {
-                    ctx.collect(String.valueOf(3000));
-                } else {
-                    ctx.collect(String.valueOf(0));
-                }
-                Thread.sleep(interval);
-            }
-        }
-
-        @Override
-        public void cancel() {
-
-        }
-    }
 }

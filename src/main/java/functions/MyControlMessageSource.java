@@ -1,21 +1,21 @@
 package functions;
 
 import misc.Constants;
-import misc.Operator;
-import models.ControlMessage;
+import models.*;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MyNumberSequenceSource extends RichParallelSourceFunction<ControlMessage> {
+public class MyControlMessageSource extends RichParallelSourceFunction<ControlMessage> {
 
     private final long interval;
     private int count = 0;
 
     private AtomicBoolean running = new AtomicBoolean(true);
 
-    public MyNumberSequenceSource(long interval) {
+    public MyControlMessageSource(long interval) {
 
         this.interval = interval;
     }
@@ -26,11 +26,18 @@ public class MyNumberSequenceSource extends RichParallelSourceFunction<ControlMe
         ControlMessage controlMessage = null;
         while(running.get()) {
             if (count == 0) {
-                controlMessage = new ControlMessage("$.value", Operator.GREATER_OR_EQUAL_TO, 3000L, 1.0, 5L, 1L, Constants.GLOBAL_CUSTOMER_ID, 1L);
+                controlMessage = new ControlMessage(
+                        "$.value", Comparison.of(ComparisonRange.of(RangeAggregationType.AVERAGE, 10L, 1L, TimeUnit.SECONDS)), 3L, 1L
+                );
             } else if (count == 1) {
-                controlMessage = new ControlMessage("$.value", Operator.GREATER_OR_EQUAL_TO, 3000L, 1.0, 5L, 1L, Constants.GLOBAL_CUSTOMER_ID, 1L);
+                controlMessage = new ControlMessage(
+                        "$.value", Comparison.of(ComparisonRange.of(RangeAggregationType.AVERAGE, 10L, 1L, TimeUnit.SECONDS)), Constants.GLOBAL_CUSTOMER_ID, 2L
+                );
+            } else {
+                controlMessage = null;
             }
             if (Objects.nonNull(controlMessage)) {
+                controlMessage.getComparison().addRule(ComparisonRule.of(Comparator.BETWEEN, 2500, 3500));
                 ctx.collect(controlMessage);
                 count++;
             }

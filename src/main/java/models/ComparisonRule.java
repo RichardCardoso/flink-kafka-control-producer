@@ -1,79 +1,91 @@
-package misc;
+package models;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class ComparisonRule<T extends Comparable<T>> {
+public class ComparisonRule implements Serializable {
 
     private final static String INVALID_UNARY_MSG_SUFFIX = " is not a valid unary comparator";
     private final static String INVALID_BINARY_MSG_SUFFIX = " is not a valid binary comparator";
-    private static final String NULL_VALUES_ERROR = "Comparison between null values is not allowed!";
+    private static final String NULL_VALUES_ERROR = "Null value is not allowed!";
     private static final String NULL_REF_VALUE_ERROR = "Reference value must be non null!";
 
     private final Comparator comparator;
-    private final T value1;
-    private final T value2;
-    private final T reference;
+    private final Double value1;
+    private final Double value2;
     private final ComparisonType comparisonType;
 
-    public ComparisonRule(Comparator unaryComparator, T value1, T value2) {
+    public static ComparisonRule of(Comparator unaryComparator, double value1) {
+
+        return new ComparisonRule(unaryComparator, value1);
+    }
+
+    public static ComparisonRule of(Comparator binaryComparator, double value1, double value2) {
+
+        return new ComparisonRule(binaryComparator, value1, value2);
+    }
+
+    private ComparisonRule(Comparator unaryComparator, Double value1) {
 
         validateUnaryComparator(unaryComparator);
-        validateUnaryValues(value1, value2);
+        validateUnaryValues(value1);
         this.comparator = unaryComparator;
         this.value1 = value1;
-        this.value2 = value2;
-        this.reference = null;
+        this.value2 = null;
         this.comparisonType = ComparisonType.UNARY;
     }
 
-    public ComparisonRule(Comparator binaryComparator, T value1, T value2, T reference) {
+    private ComparisonRule(Comparator binaryComparator, Double value1, Double value2) {
 
         validateBinaryComparator(binaryComparator);
-        validateBinaryValues(value1, value2, reference);
+        validateBinaryValues(value1, value2);
         this.comparator = binaryComparator;
         this.value1 = value1;
         this.value2 = value2;
-        this.reference = reference;
         this.comparisonType = ComparisonType.BINARY;
     }
 
-    public boolean match() {
+    public boolean matches(Double reference) {
+
+        if (Objects.isNull(reference)) {
+            throw new RuntimeException(NULL_REF_VALUE_ERROR);
+        }
 
         switch (comparisonType){
             case UNARY:
-                return unaryMatch();
+                return unaryMatch(reference);
             case BINARY:
-                return binaryMatch();
+                return binaryMatch(reference);
             default:
                 throw new RuntimeException("Invalid comparison parameters");
         }
     }
 
-    private <T extends Comparable<T>> boolean unaryMatch() {
+    private boolean unaryMatch(Double reference) {
 
-        if (value1 == null || value2 == null) {
+        if (value1 == null || reference == null) {
             return false; // You can decide how to handle null values
         }
 
         switch (comparator) {
             case SMALLER_THAN:
-                return value1.compareTo(value2) < 0;
+                return value1.compareTo(reference) < 0;
             case SMALLER_OR_EQUAL_TO:
-                return value1.compareTo(value2) <= 0;
+                return value1.compareTo(reference) <= 0;
             case GREATER_THAN:
-                return value1.compareTo(value2) > 0;
+                return value1.compareTo(reference) > 0;
             case GREATER_OR_EQUAL_TO:
-                return value1.compareTo(value2) >= 0;
+                return value1.compareTo(reference) >= 0;
             case EQUAL:
-                return value1.compareTo(value2) == 0;
+                return value1.compareTo(reference) == 0;
             case NOT_EQUAL:
-                return value1.compareTo(value2) != 0;
+                return value1.compareTo(reference) != 0;
             default:
                 throw new IllegalArgumentException("Unsupported operator: " + comparator);
         }
     }
 
-    private < T extends Comparable<T>> boolean binaryMatch() {
+    private boolean binaryMatch(Double reference) {
 
         if (value1 == null || value2 == null || reference == null) {
             return false; // If any input is null, return false
@@ -112,19 +124,17 @@ public class ComparisonRule<T extends Comparable<T>> {
         throw new RuntimeException(comparator + INVALID_BINARY_MSG_SUFFIX);
     }
 
-    private static void validateUnaryValues(Object value1, Object value2) {
+    private static void validateUnaryValues(Object value1) {
 
-        if (Objects.isNull(value1) || Objects.isNull(value2)) {
+        if (Objects.isNull(value1)) {
             throw new RuntimeException(NULL_VALUES_ERROR);
         }
     }
 
-    private void validateBinaryValues(T value1, T value2, T reference) {
+    private void validateBinaryValues(Double value1, Double value2) {
 
-        validateUnaryValues(value1, value2);
-        if (Objects.isNull(reference)) {
-            throw new RuntimeException(NULL_REF_VALUE_ERROR);
-        }
+        validateUnaryValues(value1);
+        validateUnaryValues(value2);
     }
 
     @Override
@@ -136,13 +146,11 @@ public class ComparisonRule<T extends Comparable<T>> {
             case UNARY:
                 stringBuilder.append(", comparator=").append(comparator);
                 stringBuilder.append(", value1=").append(value1);
-                stringBuilder.append(", value2=").append(value2);
                 break;
             case BINARY:
                 stringBuilder.append(", comparator=").append(comparator);
                 stringBuilder.append(", value1=").append(value1);
                 stringBuilder.append(", value2=").append(value2);
-                stringBuilder.append(", reference=").append(reference);
                 break;
         }
 
@@ -153,6 +161,22 @@ public class ComparisonRule<T extends Comparable<T>> {
     private enum ComparisonType {
 
         UNARY,
-        BINARY;
+        BINARY
+    }
+
+    public Comparator getComparator() {
+        return comparator;
+    }
+
+    public Double getValue1() {
+        return value1;
+    }
+
+    public Double getValue2() {
+        return value2;
+    }
+
+    public ComparisonType getComparisonType() {
+        return comparisonType;
     }
 }

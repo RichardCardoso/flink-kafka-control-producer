@@ -1,97 +1,57 @@
 package models;
 
-import misc.Operator;
-
 import java.io.Serializable;
+import java.util.Date;
 
 public class ControlMessage implements Serializable {
 
-    private String targetField;
+    private final String targetField;
 
-    private Operator operator;
-    private Long value;
+    private final Comparison comparison;
 
-    private double thresholdPercent;
+    private final Long customerId;
 
-    private Long windowSize;
-    private Long slideSize;
+    private final Long alertId;
 
-    private Long customerId;
+    private final Date createdAt;
 
-    private Long alertId;
+    public ControlMessage(String targetField, Comparison comparison, Long customerId, Long alertId) {
 
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
-
-    public ControlMessage(String targetField, Operator operator, Long value, double thresholdPercent, Long windowSize, Long slideSize, Long customerId, Long alertId) {
         this.targetField = targetField;
-        this.operator = operator;
-        this.value = value;
-        this.thresholdPercent = thresholdPercent;
-        this.windowSize = windowSize;
-        this.slideSize = slideSize;
+        this.comparison = comparison;
         this.customerId = customerId;
         this.alertId = alertId;
-    }
-
-    public Operator getOperator() {
-        return operator;
-    }
-
-    public void setOperator(Operator operator) {
-        this.operator = operator;
-    }
-
-    public Long getValue() {
-        return value;
-    }
-
-    public void setValue(Long value) {
-        this.value = value;
-    }
-
-    public Long getWindowSize() {
-        return windowSize;
-    }
-
-    public void setWindowSize(Long windowSize) {
-        this.windowSize = windowSize;
-    }
-
-    public Long getSlideSize() {
-        return slideSize;
-    }
-
-    public void setSlideSize(Long slideSize) {
-        this.slideSize = slideSize;
-    }
-
-    public Long getAlertId() {
-        return alertId;
-    }
-
-    public void setAlertId(Long alertId) {
-        this.alertId = alertId;
-    }
-
-    public double getThresholdPercent() {
-        return thresholdPercent;
-    }
-
-    public void setThresholdPercent(double thresholdPercent) {
-        this.thresholdPercent = thresholdPercent;
+        createdAt = new Date();
     }
 
     public String getTargetField() {
         return targetField;
     }
 
-    public void setTargetField(String targetField) {
-        this.targetField = targetField;
+    public Comparison getComparison() {
+        return comparison;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public Long getAlertId() {
+        return alertId;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "ControlMessage{" +
+                "targetField='" + targetField + '\'' +
+                ", comparison=" + comparison +
+                ", customerId=" + customerId +
+                ", alertId=" + alertId +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

@@ -16,7 +16,6 @@ services:
 
   taskmanager:
     image: flink:latest
-    container_name: taskmanager
     command: taskmanager
     environment:
       FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"

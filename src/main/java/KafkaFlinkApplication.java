@@ -1,7 +1,11 @@
+import functions.MyControlMessageSource;
+import models.ControlMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import serialization.ControlMessageSchema;
 
+import javax.naming.ldap.Control;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -24,10 +28,10 @@ public class KafkaFlinkApplication {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // DataSource
-        DataStream<String> numbers = env.addSource(new ControlProducer.MyNumberSequenceSource(1000)).setParallelism(1);
-        numbers.sinkTo(ControlProducer.producer(params));
+        DataStream<ControlMessage> controlMessageSource = env.addSource(new MyControlMessageSource(1000)).setParallelism(1);
+        controlMessageSource.sinkTo(new ControlProducer<ControlMessage, ControlMessageSchema>().producer(params, "control", new ControlMessageSchema()));
 
-        numbers.print();
+        controlMessageSource.print();
 
         System.out.println("Starting flink job - producer");
 
