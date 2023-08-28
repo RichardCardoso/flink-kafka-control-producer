@@ -29,10 +29,6 @@ public class MyControlMessageSource extends RichParallelSourceFunction<ControlMe
                 controlMessage = new ControlMessage(
                         "$.value", Comparison.of(ComparisonRange.of(RangeAggregationType.AVERAGE, 10L, 1L, TimeUnit.SECONDS)), 3L, 1L
                 );
-            } else if (count == 1) {
-                controlMessage = new ControlMessage(
-                        "$.value", Comparison.of(ComparisonRange.of(RangeAggregationType.AVERAGE, 10L, 1L, TimeUnit.SECONDS)), Constants.GLOBAL_CUSTOMER_ID, 2L
-                );
             } else {
                 controlMessage = null;
             }
